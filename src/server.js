@@ -12,7 +12,7 @@ import { routes } from './routes.js';
 // Exemplo: http://localhost:3333/users/1
 
 // Request Body: corpo da requisição, envio de informações de um formulário
-// utilizado para criar ou alterar recursos, e passam pelo protocolo htttps que são mais seguros
+// utilizado para criar ou alterar recursos, e passam pelo protocolo https que são mais seguros
 // Exemplo: http://localhost:3333/users
 
 const server = http.createServer(async (req, res) => {
@@ -21,10 +21,14 @@ const server = http.createServer(async (req, res) => {
   await json(req, res);
 
   const route = routes.find(route => {
-    return route.method === method && route.path === url;
+    return route.method === method && route.path.test(url);
   });
 
   if (route) {
+    const routeParams = req.url.match(route.path);
+
+    req.params = { ...routeParams.groups };
+
     return route.handler(req, res);
   }
 

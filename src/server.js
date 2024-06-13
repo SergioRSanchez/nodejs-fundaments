@@ -2,9 +2,10 @@ import http from 'node:http';
 
 import { json } from './middlewares/json.js';
 import { routes } from './routes.js';
+import { extractQueryParams } from './utils/extract-query-params.js';
 
-// Query Params: parâmetros nomeados enviados no endereço da requisição
-// utilizado para URL stateful, filtros, paginação, não obrigatórios
+// Query Params: parâmetros nomeados enviados no endereço da requisição, NÃO OBRIGATÓRIOS
+// utilizado para URL stateful, filtros, paginação
 // Exemplo: http://localhost:3333/users?userId=1&name=Sergio
 
 // Route Params: parâmetros não nomeados
@@ -27,7 +28,10 @@ const server = http.createServer(async (req, res) => {
   if (route) {
     const routeParams = req.url.match(route.path);
 
-    req.params = { ...routeParams.groups };
+    const { query, ...params } = routeParams.groups
+
+    req.params = params;
+    req.query = query ? extractQueryParams(query) : {};
 
     return route.handler(req, res);
   }
